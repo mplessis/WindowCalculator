@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final TextEditingController lengthController = TextEditingController();
   final TextEditingController widthController = TextEditingController();
-  double surface = 0;
+  String surface = "";
   bool isMillimeter = false;
 
   @override
@@ -58,17 +58,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void calculateSurface() {
-    double length = double.parse(lengthController.text);
-    double width = double.parse(widthController.text);
 
-    if (length <= 0 || width <= 0) {
+    if(isInputValuesInvalid()) {
       showOkAlertDialog(
           context: context,
-          title: 'Erreur',
+          title: 'Erreur de saisie',
           message:
-              'Veuillez entrer des valeurs valides pour la longueur et la largeur.');
+          'Veuillez entrer des valeurs pour la longueur et la largeur.');
       return;
     }
+
+    double length = double.parse(lengthController.text);
+    double width = double.parse(widthController.text);
 
     setState(() {
       if (isMillimeter) {
@@ -78,9 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
         length /= 100;
         width /= 100;
       }
-      surface = length * width;
+      surface = (length * width).toStringAsFixed(2);
     });
   }
+
+  bool isInputValuesInvalid() => lengthController.text.isEmpty || widthController.text.isEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -93,74 +96,8 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text('Centimètres',
-                    style: isMillimeter
-                        ? const TextStyle(fontSize: 16)
-                        : TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: Theme.of(context).colorScheme.primary)),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                  child: Switch(
-                      value: isMillimeter,
-                      onChanged: (value) {
-                        setState(() {
-                          isMillimeter = value;
-                        });
-                      }),
-                ),
-                Text('Millimètres',
-                    style: isMillimeter
-                        ? TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: Theme.of(context).colorScheme.primary)
-                        : const TextStyle(fontSize: 16)),
-              ],
-            ),
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: TextFormField(
-                      focusNode: _focus,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer une valeur pour la longueur';
-                        }
-                        return null;
-                      },
-                      controller: lengthController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          labelText: 'Longeur (${displayUnit()})'),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: TextFormField(
-                      focusNode: _focusWidth,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer une valeur pour la largeur';
-                        }
-                        return null;
-                      },
-                      controller: widthController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                          labelText: 'Largeur (${displayUnit()})'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildSwitchToDefineUnit(),
+            _buildForm(),
             Padding(
               padding: const EdgeInsets.only(top: 30.0),
               child: ElevatedButton(
@@ -182,4 +119,78 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String displayUnit() => isMillimeter ? 'mm' : 'cm';
+
+  Widget _buildSwitchToDefineUnit(){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text('Centimètres',
+            style: isMillimeter
+                ? const TextStyle(fontSize: 16)
+                : TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.primary)),
+        Padding(
+          padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+          child: Switch(
+              value: isMillimeter,
+              onChanged: (value) {
+                setState(() {
+                  isMillimeter = value;
+                });
+              }),
+        ),
+        Text('Millimètres',
+            style: isMillimeter
+                ? TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.primary)
+                : const TextStyle(fontSize: 16)),
+      ],
+    );
+  }
+
+  Widget _buildForm(){
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 20.0),
+            child: TextFormField(
+              focusNode: _focus,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer une valeur pour la longueur';
+                }
+                return null;
+              },
+              controller: lengthController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                  labelText: 'Longeur (${displayUnit()})'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: TextFormField(
+              focusNode: _focusWidth,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez entrer une valeur pour la largeur';
+                }
+                return null;
+              },
+              controller: widthController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                  labelText: 'Largeur (${displayUnit()})'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
