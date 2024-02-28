@@ -22,9 +22,12 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
 
-    - name: Build APK
+    - name: Build App Bundle
       run: flutter build appbundle --release --build-number=${GITHUB_RUN_NUMBER}
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.3.1
+      with:
+        name: release-aab
+        path: build/app/outputs/flutter-apk/app-release.aab
           
