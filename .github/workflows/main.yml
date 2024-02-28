@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build_and_publish:
+  build:
     name: Build and Publish
     runs-on: ubuntu-latest
 
@@ -23,4 +23,8 @@ jobs:
       run: flutter pub get
 
     - name: Build APK
-      run: flutter build apk --release
+      run: flutter build appbundle --release --build-number=${GITHUB_RUN_NUMBER}
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.3.1
+          
