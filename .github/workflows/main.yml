@@ -25,7 +25,24 @@ jobs:
     - name: Build App Bundle
       run: flutter build appbundle --release --build-number=${GITHUB_RUN_NUMBER}
 
-    - name: Upload a Build Artifact
+    - name: Setup keystore file
+      run: |
+        echo "${{ secrets.ANDROID_KEYSTORE_FILE }}" > key.keystore.asc
+        gpg -d --passphrase "${{ secrets.KEY_STORE_GPG_PASSWORD }}" --batch key.keystore.asc > key.keystore
+
+    - name: Sign AAB
+      run: |
+        jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
+          -keystore key.keystore \
+          -storepass ${{ secrets.KEY_STORE_GPG_PASSWORD }} \
+          -keypass ${{ secrets.KEY_STORE_GPG_PASSWORD }} \
+          ./build/app/outputs/bundle/release/app-release.aab \
+          kWindowCalculator
+
+    - name: Verify signed AAB
+      run: jarsigner -verify -verbose -certs ./build/app/outputs/bundle/release/app-release.aab
+
+    - name: Upload a generated artifact
       uses: actions/upload-artifact@v4.3.1
       with:
         name: release-aab
