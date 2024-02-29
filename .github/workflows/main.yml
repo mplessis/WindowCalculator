@@ -32,7 +32,7 @@ jobs:
 
     - name: Sign AAB
       run: |
-        jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA-1 \
+        jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
           -keystore key.keystore \
           -storepass ${{ secrets.KEY_STORE_GPG_PASSWORD }} \
           -keypass ${{ secrets.KEY_STORE_GPG_PASSWORD }} \
